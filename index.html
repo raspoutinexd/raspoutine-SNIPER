@@ -1,0 +1,184 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Username Sniper</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#080b13;color:#edf3ff;
+ font-family:Arial,sans-serif;padding:25px
+}
+main{max-width:850px;margin:35px auto}
+header{text-align:center;margin-bottom:30px}
+h1{font-size:34px;letter-spacing:4px;color:#56a0ff}
+header p{color:#8394ae}
+.panel{
+ background:#111a2a;border:1px solid #273b5b;
+ border-radius:15px;padding:22px;margin-bottom:18px
+}
+label{display:block;margin-bottom:9px;color:#9fb4d5;font-size:13px}
+select{
+ width:100%;padding:13px;background:#091222;
+ color:white;border:1px solid #304666;border-radius:8px
+}
+.options{display:flex;gap:12px;flex-wrap:wrap}
+.option{
+ background:#091222;border:1px solid #304666;
+ padding:12px;border-radius:9px;cursor:pointer
+}
+input[type=checkbox]{accent-color:#438aff}
+button{
+ background:#286ce0;color:white;border:0;
+ padding:13px 17px;border-radius:8px;
+ cursor:pointer;font-weight:bold
+}
+button:hover{background:#4789ff}
+.secondary{background:#24354e}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+#results{display:grid;gap:9px;margin-top:15px}
+.item{
+ display:flex;justify-content:space-between;align-items:center;
+ gap:10px;background:#091222;padding:13px;border-radius:9px;
+ border:1px solid #263a58
+}
+.name{font-family:monospace;font-size:17px}
+.status{color:#ffca6b;font-size:12px}
+.item button{padding:8px 12px}
+.note{font-size:12px;color:#8495af;line-height:1.6}
+#counter{color:#8eadd9}
+@media(max-width:500px){
+ body{padding:12px}
+ h1{font-size:25px}
+ .item{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+<main>
+<header>
+ <h1>USERNAME SNIPER</h1>
+ <p>SHORT USERNAMES GENERATOR · 2–4 CHARACTÈRES</p>
+</header>
+
+<section class="panel">
+ <label for="platform">PLATEFORME</label>
+ <select id="platform">
+  <option>Discord</option>
+  <option>Telegram</option>
+  <option>Instagram</option>
+  <option>X / Twitter</option>
+  <option>TikTok</option>
+  <option>Twitch</option>
+  <option>YouTube</option>
+ </select>
+
+ <br><br>
+ <label>LONGUEUR DES PSEUDOS</label>
+ <div class="options">
+  <label class="option"><input type="checkbox" value="2" checked> 2 lettres</label>
+  <label class="option"><input type="checkbox" value="3" checked> 3 lettres</label>
+  <label class="option"><input type="checkbox" value="4" checked> 4 lettres</label>
+ </div>
+
+ <br>
+ <label for="amount">NOMBRE DE CANDIDATS</label>
+ <select id="amount">
+  <option value="50">50 pseudos</option>
+  <option value="100" selected>100 pseudos</option>
+  <option value="500">500 pseudos</option>
+ </select>
+
+ <div class="actions">
+  <button onclick="generate()">⚡ LANCER LE SCAN</button>
+  <button class="secondary" onclick="copyAll()">COPIER TOUT</button>
+ </div>
+</section>
+
+<section class="panel">
+ <h3>RÉSULTATS <span id="counter"></span></h3>
+ <p class="note">Les candidats sont générés aléatoirement.
+Le statut reste « À vérifier » tant qu'une disponibilité
+n'a pas été confirmée par la plateforme.</p>
+ <div id="results">
+  <p class="note">En attente du premier scan...</p>
+ </div>
+</section>
+</main>
+
+<script>
+let candidates=[];
+
+function generate(){
+ const lengths=[...document.querySelectorAll(
+  'input[type=checkbox]:checked'
+ )].map(x=>Number(x.value));
+
+ if(!lengths.length){
+  alert("Choisis au moins une longueur.");
+  return;
+ }
+
+ const amount=Number(document.getElementById("amount").value);
+ const alphabet="abcdefghijklmnopqrstuvwxyz";
+ const found=new Set();
+ const max=10000;
+
+ while(found.size<amount && found.size<max){
+  const len=lengths[Math.floor(Math.random()*lengths.length)];
+  let name="";
+  for(let i=0;i<len;i++){
+   name+=alphabet[Math.floor(Math.random()*alphabet.length)];
+  }
+  found.add(name);
+ }
+
+ candidates=[...found];
+ render();
+}
+
+function render(){
+ const results=document.getElementById("results");
+ results.replaceChildren();
+
+ document.getElementById("counter").textContent=
+  "("+candidates.length+")";
+
+ candidates.forEach(name=>{
+  const item=document.createElement("div");
+  item.className="item";
+
+  const left=document.createElement("div");
+  const username=document.createElement("div");
+  username.className="name";
+  username.textContent=name;
+
+  const status=document.createElement("div");
+  status.className="status";
+  status.textContent="● DISPONIBILITÉ À VÉRIFIER";
+
+  left.append(username,status);
+
+  const copy=document.createElement("button");
+  copy.textContent="COPIER";
+  copy.onclick=()=>navigator.clipboard.writeText(name);
+
+  item.append(left,copy);
+  results.append(item);
+ });
+}
+
+function copyAll(){
+ if(!candidates.length){
+  alert("Lance d'abord un scan.");
+  return;
+ }
+ navigator.clipboard.writeText(candidates.join("\n"))
+  .then(()=>alert("Pseudos copiés !"))
+  .catch(()=>alert("Copie non autorisée par le navigateur."));
+}
+</script>
+</body>
+</html>
